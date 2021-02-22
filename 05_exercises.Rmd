@@ -33,6 +33,7 @@ library(gganimate)     # for adding animation layers to ggplots
 library(transformr)    # for "tweening" (gganimate)
 library(gifski)        # need the library for creating gifs but don't need to load each time
 library(shiny)         # for creating interactive apps
+library(ggimage)
 theme_set(theme_minimal())
 ```
 
@@ -196,25 +197,34 @@ knitr::include_graphics("tomato_anim.gif")
   * CHALLENGE: use the `ggimage` package and `geom_image` to add a bike image instead of a red point. You can use [this](https://raw.githubusercontent.com/llendway/animation_and_interactivity/master/bike.png) image. See [here](https://goodekat.github.io/presentations/2019-isugg-gganimate-spooky/slides.html#35) for an example. 
   * Add something of your own! And comment on if you prefer this to the static map and why or why not.
   
-```{r, eval = FALSE}
+```{r}
 mallorca <- get_stamenmap(
   bbox = c(left = 2.2378, bottom = 39.4512, right = 2.9863, top = 39.7686),
   maptype = "terrain",
   zoom = 10
 )
 
+bike_image <- "https://raw.githubusercontent.com/llendway/animation_and_interactivity/master/bike.png"
+
+mallorca_bike <- mallorca_bike_day7 %>% 
+  mutate(image = bike_image)
+
 ggmap(mallorca) +
-  geom_point(data = mallorca_bike_day7,
-         aes(x = lon,
+  geom_point(data = mallorca_bike,
+             aes(x = lon,
              y = lat),
          color = "red") +
-  geom_line(data = mallorca_bike_day7,
+  geom_line(data = mallorca_bike,
             aes(x = lon,
                 y = lat,
                 color = ele)) +
+  geom_image(data = mallorca_bike,
+             aes(image = image), 
+             size = 0.1) +
   scale_color_viridis_c(option = "viridis") +
   theme_map() +
   labs(title = "Elevation of Mallorca Bike Trip",
+       subtitle = "Date: {frame_along}",
        color = "") +
   transition_reveal(time)
 ```
@@ -231,8 +241,41 @@ knitr::include_graphics("mallorca_anim.gif")
   5. In this exercise, you get to meet my sister, Heather! She is a proud Mac grad, currently works as a Data Scientist at 3M where she uses R everyday, and for a few years (while still holding a full-time job) she was a pro triathlete. You are going to map one of her races. The data from each discipline of the Ironman 70.3 Pan Am championships, Panama is in a separate file - `panama_swim`, `panama_bike`, and `panama_run`. Create a similar map to the one you created with my cycling data. You will need to make some small changes: 1. combine the files (HINT: `bind_rows()`, 2. make the leading dot a different color depending on the event (for an extra challenge, make it a different image using `geom_image()!), 3. CHALLENGE (optional): color by speed, which you will need to compute on your own from the data. You can read Heather's race report [here](https://heatherlendway.com/2016/02/10/ironman-70-3-pan-american-championships-panama-race-report/). She is also in the Macalester Athletics [Hall of Fame](https://athletics.macalester.edu/honors/hall-of-fame/heather-lendway/184) and still has records at the pool. 
   
 ```{r}
+panama_all <- bind_rows(list(panama_bike, panama_run, panama_swim), .id="id")
+```
+  
+```{r, eval = FALSE}
+panama_city <- get_stamenmap(
+  bbox = c(left = -79.6361, bottom = 8.8913, right = -79.4490, top = 8.9931),
+  maptype = "terrain",
+  zoom = 13
+)
+
+ggmap(panama_city) +
+  geom_line(data = panama_all,
+            aes(x = lon,
+                y = lat)) +
+  geom_point(data = panama_all,
+             aes(x = lon,
+                 y = lat,
+                 color = id)) +
+  theme_map() +
+  labs(title = "Heather's Ironman 70.3 Pan Am Route",
+       subtitle = "Date: {frame_along}",
+       color = "") +
+  scale_color_discrete(labels = c("Bike", "Run", "Swim")) +
+  transition_reveal(hrminsec)
 
 ```
+  
+```{r}
+anim_save("heather_anim.gif")
+```
+  
+```{r}
+knitr::include_graphics("heather_anim.gif")
+```
+  
   
 ## COVID-19 data
 
