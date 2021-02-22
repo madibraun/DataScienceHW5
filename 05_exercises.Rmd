@@ -83,11 +83,67 @@ Once your repository is created, you should always open your **project** rather 
 
   1. Choose 2 graphs you have created for ANY assignment in this class and add interactivity using the `ggplotly()` function.
   
+```{r}
+student_debt <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/student_debt.csv')
+
+student_debt_plot <- ggplot(student_debt, aes(x = year, y = loan_debt)) +
+  geom_col(aes(fill = race), position = "fill", alpha = 0.5) +
+  labs(fill = "", x = "", y = "", title = "Proportion of Total Student Debt by Race, 1989 - 2016", 
+       subtitle = "For families aged 25-55, normalized to 2016 dollars") +
+  scale_fill_manual(values = c("cadetblue", "darkgoldenrod1", "darksalmon")) +
+  theme(plot.background = element_rect(fill = "grey97"),
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+ggplotly(student_debt_plot)
+```
+  
+  
+```{r}
+covid_plot <- covid19 %>% 
+  filter(state %in% c("Minnesota", "Wisconsin", "Iowa", "North Dakota", "South Dakota")) %>% 
+  ggplot(aes(x = date, y = cases)) +
+  geom_line(aes(color = state)) +
+  labs(x = "Date", y = "Cumulative Cases")
+
+ggplotly(covid_plot)
+```
+  
+  
   2. Use animation to tell an interesting story with the `small_trains` dataset that contains data from the SNCF (National Society of French Railways). These are Tidy Tuesday data! Read more about it [here](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-02-26).
 
-```{r}
+```{r, eval = FALSE}
+trains_all <- small_trains %>% 
+  unite(dep_arr_stations, 
+        departure_station, 
+        arrival_station, 
+        sep = " to ", 
+        remove = FALSE) %>% 
+  group_by(month, year) %>% 
+  summarize(all_station_avg = mean(journey_time_avg))
 
+trains_anim <- ggplot(trains_all, 
+         aes(x = year,
+             y = all_station_avg,
+             color = as.factor(month))) +
+  geom_line() +
+  labs(title = "Annual Average Journey Time by Month",
+       x = "",
+       y = "",
+       color = "Month Number") +
+  theme(legend.position = "top") +
+  transition_reveal(year)
 ```
+
+```{r}
+anim_save("trains.gif")
+```
+
+
+```{r}
+knitr::include_graphics("trains.gif")
+```
+
 
 ## Garden data
 
