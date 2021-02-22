@@ -114,11 +114,6 @@ ggplotly(covid_plot)
 
 ```{r, eval = FALSE}
 trains_all <- small_trains %>% 
-  unite(dep_arr_stations, 
-        departure_station, 
-        arrival_station, 
-        sep = " to ", 
-        remove = FALSE) %>% 
   group_by(month, year) %>% 
   summarize(all_station_avg = mean(journey_time_avg))
 
@@ -155,13 +150,37 @@ knitr::include_graphics("trains.gif")
 
 I have started the code for you below. The `complete()` function creates a row for all unique `date`/`variety` combinations. If a variety is not harvested on one of the harvest dates in the dataset, it is filled with a value of 0.
 
-```{r}
-garden_harvest %>% 
+```{r, eval = FALSE}
+tomato <- garden_harvest %>% 
   filter(vegetable == "tomatoes") %>% 
   group_by(date, variety) %>% 
   summarize(daily_harvest_lb = sum(weight)*0.00220462) %>% 
   ungroup() %>% 
-  complete(variety, date, fill = list(daily_harvest_lb = 0))
+  complete(variety, date, fill = list(daily_harvest_lb = 0)) %>% 
+  group_by(variety) %>% 
+  summarize(variety, date, daily_harvest_lb, cumul_harvest=sum(daily_harvest_lb))
+
+ggplot(tomato,
+       aes(x = date,
+           y = daily_harvest_lb,
+           fill = fct_reorder(variety, cumul_harvest))) +
+  geom_area() +
+  labs(title = "Daily Tomato Harvest Weight (in lbs) Over Time",
+       x = "",
+       y = "",
+       fill = "") +
+  theme(legend.position = "top") +
+  transition_reveal(date)
+```
+
+
+```{r}
+anim_save("tomato_anim.gif")
+```
+
+
+```{r}
+knitr::include_graphics("tomato_anim.gif")
 ```
 
 
