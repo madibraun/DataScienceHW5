@@ -12,7 +12,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
 ```{r libraries}
@@ -105,7 +105,10 @@ covid_plot <- covid19 %>%
   filter(state %in% c("Minnesota", "Wisconsin", "Iowa", "North Dakota", "South Dakota")) %>% 
   ggplot(aes(x = date, y = cases)) +
   geom_line(aes(color = state)) +
-  labs(x = "Date", y = "Cumulative Cases")
+  labs(title = "Cumulative COVID-19 Cases in Midwest Over Time",
+       x = "",
+       y = "",
+       color = "")
 
 ggplotly(covid_plot)
 ```
@@ -118,7 +121,7 @@ trains_all <- small_trains %>%
   group_by(month, year) %>% 
   summarize(all_station_avg = mean(journey_time_avg))
 
-trains_anim <- ggplot(trains_all, 
+ggplot(trains_all, 
          aes(x = year,
              y = all_station_avg,
              color = as.factor(month))) +
@@ -131,12 +134,12 @@ trains_anim <- ggplot(trains_all,
   transition_reveal(year)
 ```
 
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 anim_save("trains.gif")
 ```
 
 
-```{r}
+```{r, echo = FALSE}
 knitr::include_graphics("trains.gif")
 ```
 
@@ -175,12 +178,12 @@ ggplot(tomato,
 ```
 
 
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 anim_save("tomato_anim.gif")
 ```
 
 
-```{r}
+```{r, echo = FALSE}
 knitr::include_graphics("tomato_anim.gif")
 ```
 
@@ -197,11 +200,11 @@ knitr::include_graphics("tomato_anim.gif")
   * CHALLENGE: use the `ggimage` package and `geom_image` to add a bike image instead of a red point. You can use [this](https://raw.githubusercontent.com/llendway/animation_and_interactivity/master/bike.png) image. See [here](https://goodekat.github.io/presentations/2019-isugg-gganimate-spooky/slides.html#35) for an example. 
   * Add something of your own! And comment on if you prefer this to the static map and why or why not.
   
-```{r}
+```{r, eval = FALSE}
 mallorca <- get_stamenmap(
-  bbox = c(left = 2.2378, bottom = 39.4512, right = 2.9863, top = 39.7686),
+  bbox = c(left = 2.2681, bottom = 39.4439, right = 3.0165, top = 39.7613),
   maptype = "terrain",
-  zoom = 10
+  zoom = 11
 )
 
 bike_image <- "https://raw.githubusercontent.com/llendway/animation_and_interactivity/master/bike.png"
@@ -220,7 +223,8 @@ ggmap(mallorca) +
                 color = ele)) +
   geom_image(data = mallorca_bike,
              aes(image = image), 
-             size = 0.1) +
+             size = 0.1,
+             color = "red") +
   scale_color_viridis_c(option = "viridis") +
   theme_map() +
   labs(title = "Elevation of Mallorca Bike Trip",
@@ -229,11 +233,11 @@ ggmap(mallorca) +
   transition_reveal(time)
 ```
   
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 anim_save("mallorca_anim.gif")
 ```
   
-```{r}
+```{r, echo = FALSE}
 knitr::include_graphics("mallorca_anim.gif")
 ```
   
@@ -252,9 +256,10 @@ panama_city <- get_stamenmap(
 )
 
 ggmap(panama_city) +
-  geom_line(data = panama_all,
+  geom_path(data = panama_all,
             aes(x = lon,
-                y = lat)) +
+                y = lat,
+                group = id)) +
   geom_point(data = panama_all,
              aes(x = lon,
                  y = lat,
@@ -268,11 +273,11 @@ ggmap(panama_city) +
 
 ```
   
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 anim_save("heather_anim.gif")
 ```
   
-```{r}
+```{r, echo = FALSE}
 knitr::include_graphics("heather_anim.gif")
 ```
   
@@ -301,7 +306,9 @@ covid_anim <- ggplot(data = covid_new,
   geom_path(aes(group = state)) +
   geom_point(aes(group = state),
              color = "red")+
-  geom_text(aes(label = state, group = state)) +
+  geom_text(aes(label = state, 
+                group = state),
+            check_overlap = TRUE) +
   scale_x_log10(labels = scales::label_comma()) +
   scale_y_log10(labels = scales::label_comma()) +
   labs(title = "Trajectory of US COVID-19 Confirmed Cases",
@@ -316,12 +323,12 @@ animate(covid_anim,
 ```
   
   
-```{r}
+```{r, eval = FALSE, echo=FALSE}
 anim_save("covid_anim.gif")
 ```
 
 
-```{r}
+```{r, echo=FALSE}
 knitr::include_graphics("covid_anim.gif")
 ```
 
@@ -356,7 +363,7 @@ covid_fri_pop <- left_join(census_pop_est_2018,
 states_map <- map_data("state")
 ```
 
-```{r}
+```{r, eval = FALSE}
 covid_map <- ggplot(data = covid_fri_pop) +
   geom_map(map = states_map,
            aes(map_id = state,
@@ -375,11 +382,11 @@ animate(covid_map,
         end_pause = 10)
 ```
 
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 anim_save("covid_map_anim.gif")
 ```
 
-```{r}
+```{r, echo = FALSE}
 knitr::include_graphics("covid_map_anim.gif")
 ```
 
